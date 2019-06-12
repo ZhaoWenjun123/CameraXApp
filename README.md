@@ -1,7 +1,7 @@
 # CameraXApp
 Getting Started with CameraX
 
-CameraXApp 代码源于[google官方的开始学习CameraX](https://codelabs.developers.google.com/codelabs/camerax-getting-started/#0)
+CameraXApp 代码源于google官方的[开始学习CameraX](https://codelabs.developers.google.com/codelabs/camerax-getting-started/#0)
 
 
 [CameraX 概览](https://developer.android.google.cn/training/camerax)
