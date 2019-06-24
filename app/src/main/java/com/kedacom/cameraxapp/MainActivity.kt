@@ -65,8 +65,8 @@ class MainActivity : AppCompatActivity() {
         //----------1、预览------------
         // 为viewfinder用例创建配置对象
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(1, 1))
-            setTargetResolution(Size(640, 640))
+            setTargetAspectRatio(Rational(1, 1))//设置长宽比
+            setTargetResolution(Size(640, 640))//设置分辨率
         }.build()
 
         // 构建viewfinder用例
