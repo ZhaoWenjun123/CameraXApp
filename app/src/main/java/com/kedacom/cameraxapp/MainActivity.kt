@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        // Every time the provided texture view changes, recompute layout
+        // 每当提供的纹理视图发生变化时，重新计算布局
         viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             updateTransform()
         }
@@ -58,20 +58,24 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewFinder: TextureView
 
+    /**
+     * 开始拍照
+     */
     private fun startCamera() {
-        // Create configuration object for the viewfinder use case
+        //----------1、预览------------
+        // 为viewfinder用例创建配置对象
         val previewConfig = PreviewConfig.Builder().apply {
             setTargetAspectRatio(Rational(1, 1))
             setTargetResolution(Size(640, 640))
         }.build()
 
-        // Build the viewfinder use case
+        // 构建viewfinder用例
         val preview = Preview(previewConfig)
 
-        // Every time the viewfinder is updated, recompute layout
+        // 每次更新取景器时，重新计算布局
         preview.setOnPreviewOutputUpdateListener {
 
-            // To update the SurfaceTexture, we have to remove it and re-add it
+            // 要更新surface etexture，我们必须删除它并重新添加它
             val parent = viewFinder.parent as ViewGroup
             parent.removeView(viewFinder)
             parent.addView(viewFinder, 0)
@@ -80,10 +84,10 @@ class MainActivity : AppCompatActivity() {
             updateTransform()
         }
 
-
+        //----------2、捕获、拍摄------------
         // Add this before CameraX.bindToLifecycle
 
-        // Create configuration object for the image capture use case
+        // 为图像捕获用例创建配置对象
         val imageCaptureConfig = ImageCaptureConfig.Builder()
             .apply {
                 setTargetAspectRatio(Rational(1, 1))
@@ -93,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                 setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
             }.build()
 
-        // Build the image capture use case and attach button click listener
+        // 构建图像捕获用例并附加按钮单击侦听器
         val imageCapture = ImageCapture(imageCaptureConfig)
         findViewById<ImageButton>(R.id.capture_button).setOnClickListener {
             val file = File(
@@ -120,7 +124,9 @@ class MainActivity : AppCompatActivity() {
                 })
         }
 
-        // Setup image analysis pipeline that computes average pixel luminance
+
+        //----------3、图像分析------------
+        // 设置计算平均像素亮度的图像分析管道
         val analyzerConfig = ImageAnalysisConfig.Builder().apply {
             // Use a worker thread for image analysis to prevent glitches
             val analyzerThread = HandlerThread(
@@ -134,18 +140,22 @@ class MainActivity : AppCompatActivity() {
             )
         }.build()
 
-        // Build the image analysis use case and instantiate our analyzer
+        // 构建映像分析用例并实例化我们的分析器
         val analyzerUseCase = ImageAnalysis(analyzerConfig).apply {
             analyzer = LuminosityAnalyzer()
         }
 
-        // Bind use cases to lifecycle
-        // If Android Studio complains about "this" being not a LifecycleOwner
-        // try rebuilding the project or updating the appcompat dependency to
-        // version 1.1.0 or higher.
+
+        //将用例绑定到生命周期
+        //如果Android Studio抱怨“this”不是一个生命周期所有者
+        //尝试重新构建项目或更新appcompat依赖项
+        //版本1.1.0或更高。
         CameraX.bindToLifecycle(this, preview, imageCapture, analyzerUseCase)
     }
 
+    /**
+     * 屏幕旋转设置
+     */
     private fun updateTransform() {
         val matrix = Matrix()
 
@@ -204,6 +214,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * 自定义图像分析器--亮度
+     */
     private class LuminosityAnalyzer : ImageAnalysis.Analyzer {
         private var lastAnalyzedTimestamp = 0L
 
@@ -220,7 +233,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun analyze(image: ImageProxy, rotationDegrees: Int) {
             val currentTimestamp = System.currentTimeMillis()
-            // Calculate the average luma no more often than every second
+            // 计算平均流明的次数不要超过每秒一次
             if (currentTimestamp - lastAnalyzedTimestamp >=
                 TimeUnit.SECONDS.toMillis(1)
             ) {
